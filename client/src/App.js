@@ -45,7 +45,7 @@ function App() {
 
   const handleButtonClick = () => {
     if(!showVideo){
-      setSocket(new WebSocket("ws://localhost:9000/"))
+      setSocket(new WebSocket("ws://10.0.0.156:9000/"))
       setVideoVisible(true)
     } else {
       setVideoVisible(false)
