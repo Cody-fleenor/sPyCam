@@ -141,6 +141,9 @@ dmypy.json
 # production
 /build
 
+# video files
+server/videos
+
 # misc
 .DS_Store
 .env.local
