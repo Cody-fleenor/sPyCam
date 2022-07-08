@@ -3,9 +3,17 @@ import React, { forwardRef } from 'react'
 
 const VideoCard = forwardRef((props, ref) => {
     // const { canvasRef  } = props;
-    const handleStopVideo = () => {}
-    const handleStartVideo = () => {}
-    const handleDownloadVideo = () => {}
+    const handleStopVideo = () => {
+
+    }
+    
+    const handleStartVideo = () => {
+
+    }
+
+    const handleDownloadVideo = () => {
+
+    }
 
     return (
         <Card>
