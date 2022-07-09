@@ -2,18 +2,20 @@
 An application for home security that allows users to manage webcams or other video capture devices that are connected to a Raspberry Pi server running a Python script. This data is then recorded locally (coming soon: S3 Storage) and can be accessed from a React web application by interacting with AWS infrastructure inlcuding DynamoDB, API Gateway, Lambda, and CodePipeline.
 
 FRONT-END
-React + Material UI with React-Router and Axios.
 ----------------------------------------------------------------
+React + Material UI with React-Router and Axios.
+
 BACK-END
+----------------------------------------------------------------
 WebCam Server and WebSocket - 
 Python application on a Raspberry Pi 4 8GB computer.
-----------------------------------------------------------------
+
 Logs Database - 
 AWS DynamoDB table and CloudWatch logs.
-----------------------------------------------------------------
+
 Videos Archive - 
 Storage on Raspberry Pi. Soon it will be available on an AWS S3 bucket.
-----------------------------------------------------------------
+
 API Backend - 
 AWS Api Gateway, Lambda (written in Python). Considering migrating to NodeJs. Might just keep files for both languages.
 
