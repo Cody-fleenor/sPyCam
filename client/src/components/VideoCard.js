@@ -1,8 +1,9 @@
-import { Card, CardContent, CardActions, Button } from '@mui/material';
+import { Card, CardContent, CardActions, Button, Typography } from '@mui/material';
 import React, { forwardRef } from 'react'
 
 const VideoCard = forwardRef((props, ref) => {
-    // const { canvasRef  } = props;
+    const { status  } = props;
+
     const handleStopVideo = () => {
 
     }
@@ -17,6 +18,7 @@ const VideoCard = forwardRef((props, ref) => {
 
     return (
         <Card>
+            <Typography variant="h5">{status}</Typography>
             <CardContent>
                 <canvas id="msg" height="250px" ref={ref} style={{display: "inline-block"}} /> 
             </CardContent>
