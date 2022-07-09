@@ -1,15 +1,24 @@
-import time, asyncio, websockets, socketserver, multiprocessing, cv2, sys
+import time, asyncio, websockets, socketserver, multiprocessing, cv2, sys, requests, os
 import http.server as http
 from datetime import datetime as dt
+from dotenv import load_dotenv
+from os.path import join, dirname
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
+API_URL = os.environ.get("API_URL")
+HOST=os.environ.get("HOST")
+CAMERA_PORT=os.environ.get("CAMERA_PORT")
+SOCKET_PORT=os.environ.get("SOCKET_PORT")
 
 # Keep track of our processes
 PROCESSES = []
-HOST="10.0.0.156"
-CAMERA_PORT="9090"
-SOCKET_PORT="9000"
 
 def log(message):
+    body = "[LOG] " + str(dt.now()) + " - " + message
     print("[LOG] " + str(dt.now()) + " - " + message)
+    requests.post(API_URL, json = body)
 
 def camera(man):
     log("Starting camera")
@@ -44,13 +53,14 @@ def camera(man):
                 detection = True
                 current_time = dt.now().strftime("%d-%m-%Y-%H-%M-%S")
                 out = cv2.VideoWriter( f"server/videos/{current_time}.mp4", fourcc, 20, frame_size)
-                print("Started Recording!")
+                log(f' Faces Detected: {len(faces)}. Bodies Detected: {len(bodies)}. Recording has started on file: {current_time}.mp4')
         elif detection:
             if timer_started:
                 if time.time() - detection_stopped_time >= SECONDS_TO_RECORD_AFTER_DETECTION:
                     detection = False
                     timer_started = False
                     out.release()
+                    log('No longer detecting faces or bodies. Recording stopped,')
                     print('Stop Recording!')
             else:
                 timer_started = True
@@ -63,7 +73,7 @@ def camera(man):
 
 # HTTP server handler
 def server():
-    server_address = ('localhost', 8000)
+    server_address = (HOST, int(CAMERA_PORT))
     if sys.version_info[1] < 7:
         class ThreadingHTTPServer(socketserver.ThreadingMixIn, http.HTTPServer):
             pass
@@ -85,7 +95,7 @@ def socket(man):
             log("Socket closed")
     log("Starting socket handler")
     # Create the awaitable object
-    start_server = websockets.serve(ws_handler=handler, host='localhost', port=8585)
+    start_server = websockets.serve(ws_handler=handler, host=HOST, port=int(SOCKET_PORT))
     # Start the server, add it to the event loop
     asyncio.get_event_loop().run_until_complete(start_server)
     # Registered our websocket connection handler, thus run event loop forever

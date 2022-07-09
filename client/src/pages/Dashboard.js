@@ -3,6 +3,8 @@ import { Grid, Card, CardContent, CardActions, Typography, Button, List, ListIte
 import { ErrorOutline, CheckCircleOutline, Pending, PersonSearch, ExpandMore  } from '@mui/icons-material';
 import VideoCard from '../components/VideoCard'
 import videoplacehoder from '../assets/tv-static.gif'
+import axios from 'axios';
+
 import "../App.css";
 
 const logs = [
@@ -179,7 +181,7 @@ function Dashboard() {
     
       const handleButtonClick = () => {
         if(!showVideo){
-            //   setSocket(new WebSocket("ws://localhost:8585/"))
+              setSocket(new WebSocket(process.env.REACT_APP_WEBSOCKET_URL))
             setVideoVisible(true)
         } else {
             setVideoVisible(false)
@@ -187,9 +189,16 @@ function Dashboard() {
         }
       }
 
-    // const handleRefresh = () => {
-    //     console.log('Refreshing...')
-    // }
+    const fetchDatabase = async() => {
+        let response = await axios.get(process.env.REACT_APP_DATABASE_GET_URL).then((response) => {
+            return response.data;
+          });
+        let formattedResponse = []
+        for (let index = 1; index < response.length; index++) {
+            formattedResponse.push(response[index].log);
+        }
+        console.log(formattedResponse)
+    }
 
     return (
         <Grid container >
@@ -199,7 +208,7 @@ function Dashboard() {
                 </Typography>
                 <List>
                     <ListItem>
-                        <Button fullWidth variant="text" color="primary">Click</Button>
+                        <Button onClick={() => fetchDatabase()} fullWidth variant="text" color="primary">Click</Button>
                     </ListItem>
                 </List>
             </Grid>
