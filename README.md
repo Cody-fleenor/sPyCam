@@ -20,9 +20,11 @@ API Backend -
 AWS Api Gateway, Lambda (written in Python). Considering migrating to NodeJs. Might just keep files for both languages.
 
 Requirements:
+----------------------------------------------------------------
 You need to have an AWS account and Raspberry Pi. You can use other devices to connect to the video feed, but I can't help you with setting that up. Submit issues on GitHub and contribute documentation, pull requests so that we can continue to expand the available features.
 
 AWS Services:
+----------------------------------------------------------------
 DynamoDB
 S3 Storage
 CloudWatch
