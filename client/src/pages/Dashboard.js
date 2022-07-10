@@ -1,72 +1,189 @@
 import React from 'react'
-import { Grid, Card, CardContent, CardActions, Typography, Button, List, ListItem, ListItemText, Accordion, AccordionSummary, AccordionDetails } from '@mui/material'
-import { ErrorOutline, CheckCircleOutline, Pending, PersonSearch, ExpandMore  } from '@mui/icons-material';
+import { Grid, Card, CardContent, CardActions, Typography, Button, List, ListItem, ListItemText, ListItemAvatar, Accordion, AccordionSummary, AccordionDetails, Badge, IconButton } from '@mui/material'
+import { Error, CheckCircle, Pending, Person, ExpandMore, Storage, Power, PhotoCamera, Announcement, MoreVert  } from '@mui/icons-material';
 import VideoCard from '../components/VideoCard'
 import videoplacehoder from '../assets/tv-static.gif'
 import axios from 'axios';
 
-const logs = [
+// Needed for debugging
+// eslint-disable-next-line
+const mock_logs = [
     {
-        id: '234235235235',
-        timestamp: '111111111111',
-        status: 'connected'
+        id: 'aszdgarseghrgb',
+        timestamp: 'timestamp',
+        status: 'active',
+        message: 'message',
+        type: 'server'
     },
     {
-        id: '23534654364324523',
-        timestamp: '111111111111',
-        status: 'personDetected'
+        id: 'fsdfasdf',
+        timestamp: 'timestamp',
+        status: 'active',
+        message: 'message',
+        type: 'server'
     },
     {
-        id: '546457457457',
-        timestamp: '111111111111',
-        status: 'disconnected'
+        id: 'asdfasghahweh',
+        timestamp: 'timestamp',
+        status: 'active',
+        message: 'message',
+        type: 'server'
     },
     {
-        id: '2334234234',
-        timestamp: '111111111111',
-        status: 'connected'
+        id: 'rhasgsxdcg',
+        timestamp: 'timestamp',
+        status: 'active',
+        message: 'message',
+        type: 'server'
     },
     {
-        id: '2342352352584835',
-        timestamp: '111111111111',
-        status: 'disconnected'
+        id: 'asdayehrg',
+        timestamp: 'timestamp',
+        status: 'active',
+        message: 'message',
+        type: 'server'
     },
     {
-        id: '34534537737',
-        timestamp: '111111111111',
-        status: 'connected'
+        id: 'retwehyadfhd',
+        timestamp: 'timestamp',
+        status: 'active',
+        message: 'message',
+        type: 'server'
     },
     {
-        id: '876544363737',
-        timestamp: '111111111111',
-        status: 'disconnected'
+        id: 'fahdfh4wsdf',
+        timestamp: 'timestamp',
+        status: 'active',
+        message: 'message',
+        type: 'server'
     },
     {
-        id: '978067868567845',
-        timestamp: '111111111111',
-        status: 'connected'
+        id: 'sdfhse5ye3dfg',
+        timestamp: 'timestamp',
+        status: 'active',
+        message: 'message',
+        type: 'server'
     },
     {
-        id: '2342764253466',
-        timestamp: '111111111111',
-        status: 'personDetected'
+        id: 'dfhaj5tjae5edrh',
+        timestamp: 'timestamp',
+        status: 'active',
+        message: 'message',
+        type: 'server'
+    }
+]
+// Needed for debugging
+// eslint-disable-next-line
+const mock_files = [
+    {
+        id: "sgasrgsdvfvv",
+        file_name: "fake_file.mp4",
+        file_path: "database/path/to/video/file/",
+        timestamp: "timestamp",
+        description: "something happened on this video"
     },
     {
-        id: '67549574579221',
-        timestamp: '111111111111',
-        status: 'disconnected'
+        id: "asdfgae5rthyedarfg",
+        file_name: "fake_file.mp4",
+        file_path: "database/path/to/video/file/",
+        timestamp: "timestamp",
+        description: "something happened on this video"
+    },
+    {
+        id: "asdgfahr5herh",
+        file_name: "fake_file.mp4",
+        file_path: "database/path/to/video/file/",
+        timestamp: "timestamp",
+        description: "something happened on this video"
+    },
+    {
+        id: "gggggfgadsfgadg",
+        file_name: "fake_file.mp4",
+        file_path: "database/path/to/video/file/",
+        timestamp: "timestamp",
+        description: "something happened on this video"
+    },
+    {
+        id: "sgasrgsdvaasdfgafvv",
+        file_name: "fake_file.mp4",
+        file_path: "database/path/to/video/file/",
+        timestamp: "timestamp",
+        description: "something happened on this video"
+    },
+    {
+        id: "asry543aerhdfh",
+        file_name: "fake_file.mp4",
+        file_path: "database/path/to/video/file/",
+        timestamp: "timestamp",
+        description: "something happened on this video"
+    },
+    {
+        id: "sgasrgsdfsdfsdvfvv",
+        file_name: "fake_file.mp4",
+        file_path: "database/path/to/video/file/",
+        timestamp: "timestamp",
+        description: "something happened on this video"
+    },
+    {
+        id: "hhhhhdearhrrfhdf",
+        file_name: "fake_file.mp4",
+        file_path: "database/path/to/video/file/",
+        timestamp: "timestamp",
+        description: "something happened on this video"
     }
 ]
 
 const StatusIcon = (props) => {
-    const { status } = props
+    const { status, type } = props
     let icons = {
         default: <Pending />,
-        connected: <CheckCircleOutline sx={{color: 'green'}} />,
-        disconnected: <ErrorOutline sx={{color: 'red'}} />,
-        personDetected: <PersonSearch sx={{color: '#61DBFB'}} />
+        person: status === 'active' ? 
+        <Badge badgeContent={<Announcement sx={{color: 'red'}} />}>
+            <Person />
+        </Badge> : <Badge badgeContent={<CheckCircle sx={{color: 'green'}} />}>
+            <Person />
+        </Badge>,
+        camera: status === 'active' ? 
+        <Badge badgeContent={<CheckCircle sx={{color: 'green'}} />}>
+            <PhotoCamera />
+        </Badge> : <Badge badgeContent={<Error sx={{color: 'red'}} />}>
+            <PhotoCamera />
+        </Badge>,
+        socket: status === 'active' ? 
+        <Badge badgeContent={<CheckCircle sx={{color: 'green'}} />}>
+            <Power />
+        </Badge> : <Badge badgeContent={<Error sx={{color: 'red'}} />}>
+            <Power />
+        </Badge>,
+        server: status === 'active' ? 
+            <Badge badgeContent={<CheckCircle sx={{color: 'green'}} />}>
+                <Storage />
+            </Badge> : <Badge badgeContent={<Error sx={{color: 'red'}} />}>
+                <Storage />
+            </Badge>,
     }
-    return icons[status]
+    return icons[type] ? icons[type] : icons.default;
+}
+
+const LogItem = props => {
+    const { log } = props
+    return (
+        <ListItem
+            secondaryAction={
+                <IconButton edge="end" aria-label="delete">
+                    <MoreVert />
+                </IconButton>
+            }
+        >
+            <ListItemAvatar>
+                <StatusIcon status={log.status} type={log.type} />
+            </ListItemAvatar>
+            <ListItemText
+                primary={log.message}
+                secondary={log.timestamp}
+            />
+        </ListItem>
+    )
 }
 
 const Logs = (props) => {
@@ -81,22 +198,35 @@ const Logs = (props) => {
                 <Typography>Stream Logs</Typography>
             </AccordionSummary>
             <AccordionDetails>
-                <List sx={{maxHeight: 250, overflowY: 'scroll'}}>
+                <List sx={{maxHeight: 250, overflowY: 'scroll'}} dense={true}>
                     {
                         logs && logs.map(log => {
                             return (
-                                <ListItem key={log.id}>
-                                    <StatusIcon status={log.status} />
-                                    <ListItemText sx={{textAlign: 'right'}}>
-                                        {log.timestamp}
-                                    </ListItemText>
-                                </ListItem>
+                                <LogItem log={log} key={log.id} />
                             )
                         })
                     }
                 </List>
             </AccordionDetails>
         </Accordion>
+    )
+}
+
+const FileItem = props => {
+    const { file } = props
+    return (
+        <ListItem
+            secondaryAction={
+                <IconButton edge="end" aria-label="delete">
+                    <MoreVert />
+                </IconButton>
+            }
+        >
+            <ListItemText
+                primary={file.description}
+                secondary={file.timestamp}
+            />
+        </ListItem>
     )
 }
 
@@ -111,17 +241,12 @@ const Files = (props) => {
             >
                 <Typography>Archive Files</Typography>
             </AccordionSummary>
-            <AccordionDetails>
-                <List sx={{maxHeight: 250, overflowY: 'scroll'}}>
+            <AccordionDetails> 
+                <List sx={{maxHeight: 250, overflowY: 'scroll'}} dense={true}>
                     {
                         files && files.map(file => {
                             return (
-                                <ListItem key={file.id}>
-                                    <StatusIcon status={file.status} />
-                                    <ListItemText sx={{textAlign: 'right'}}>
-                                        {file.timestamp}
-                                    </ListItemText>
-                                </ListItem>
+                                <FileItem file={file} key={file.id} />
                             )
                         })
                     }
@@ -135,7 +260,7 @@ function Dashboard() {
     const [ showVideo, setVideoVisible ] = React.useState(false);
     const [socket, setSocket] = React.useState(null);
     const [status, setStatus] = React.useState('Disconnected.');
-    // const [logs, setLogs] = React.useState([]);
+    const [logs, setLogs] = React.useState(null);
     const canvasRef = React.useRef();
   
     const changeFrame = function (e) {
@@ -149,14 +274,12 @@ function Dashboard() {
       });
     }
 
-    // React.useEffect(() => {
-    //     if(!socket){
-    //         setSocket(new WebSocket(process.env.REACT_APP_WEBSOCKET_URL))
-    //         setVideoVisible(true)
-    //     }
-    //     temp_logs = fetchDatabase()
-    //     setLogs(temp_logs)
-    // }, [logs])
+    React.useEffect(() => {
+        axios.get(process.env.REACT_APP_DATABASE_GET_URL)
+        .then((response) => {return response.data})
+        .then((json) => setLogs(json))
+        .catch((error) => console.log(error));
+    }, [])
 
     const disconnectSocket =  () => {
         socket.send('!DISCONNECT')
@@ -170,7 +293,7 @@ function Dashboard() {
           setStatus('Connected.')
         });
         socket.addEventListener('error', (event) => {
-          console.log('WebSocket error: ', event);
+        //   console.log('WebSocket error: ', event);
           setStatus('Error : ' + event.message)
         });
         socket.addEventListener('message', (event) => {
@@ -193,13 +316,12 @@ function Dashboard() {
         }
     }
 
+    // Needed for debugging
+    // eslint-disable-next-line
     const fetchDatabase = async() => {
-        let response = await axios.get(process.env.REACT_APP_DATABASE_GET_URL).then(response => response.data);
-        let formattedResponse = [];
-        for (let index = 1; index < response.length; index++) {
-            formattedResponse.push(response[index].log);
-        };
-        return formattedResponse
+        let response = await axios.get(process.env.REACT_APP_DATABASE_GET_URL)
+        response = response.data;
+        console.log(response)
     }
 
     return (
@@ -211,41 +333,24 @@ function Dashboard() {
             spacing={2}
             sx={{padding: '50px'}}
         >
-            <Grid item xs={2}>
-                <Typography variant="body">
-                    Menu
-                </Typography>
-                <List>
-                    <ListItem>
-                        <Button onClick={() => fetchDatabase()} fullWidth variant="text" color="primary">Click</Button>
-                    </ListItem>
-                </List>
+            <Grid item xs={4}>
+                {/* <Button fullWidth onClick={() => fetchDatabase()}>Database</Button> */}
+                <Logs logs={logs} />
+                <Files files={mock_files} />
             </Grid>
-            <Grid item xs={10}>
-                <Grid container>
-                    <Grid item xs={12}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={4}>
-                                <Logs logs={logs} />
-                                <Files files={logs} />
-                            </Grid>
-                            <Grid item xs={8}>
-                                {
-                                    showVideo ? <VideoCard ref={canvasRef} status={status} /> : 
-                                    <Card>
-                                        <Typography variant="h5">{status}</Typography>
-                                        <CardContent sx={{textAlign: 'center', boxSizing: 'border-box'}}>
-                                            <canvas id="msg" height="250px" style={{display: "inline-block", backgroundImage: `url(${videoplacehoder})`}} /> 
-                                        </CardContent>
-                                        <CardActions >
-                                            <Button onClick={() => handleButtonClick()}>Connect</Button>
-                                        </CardActions>
-                                    </Card>
-                                }
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </Grid>
+            <Grid item xs={8}>
+                {
+                    showVideo ? <VideoCard ref={canvasRef} status={status} /> : 
+                    <Card>
+                        <Typography variant="h5">{status}</Typography>
+                        <CardContent sx={{textAlign: 'center', boxSizing: 'border-box'}}>
+                            <canvas id="msg" height="250px" style={{display: "inline-block", backgroundImage: `url(${videoplacehoder})`}} /> 
+                        </CardContent>
+                        <CardActions >
+                            <Button onClick={() => handleButtonClick()}>Connect</Button>
+                        </CardActions>
+                    </Card>
+                }
             </Grid>
         </Grid>
     )
