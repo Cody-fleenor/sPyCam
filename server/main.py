@@ -3,6 +3,7 @@ import http.server as http
 from datetime import datetime as dt
 from dotenv import load_dotenv
 from os.path import join, dirname
+import random, string
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -15,13 +16,40 @@ SOCKET_PORT=os.environ.get("SOCKET_PORT")
 # Keep track of our processes
 PROCESSES = []
 
+log_format = {
+    'id': '234235235235',
+    'timestamp': '111111111111',
+    'status': 'connected'
+}
+
+{
+    'version': '1.0', 
+    'resource': '/logs', 'path': '/logs', 'httpMethod': 'POST', 
+    'headers': {
+        'Content-Length': '154', 'Content-Type': 'application/json', 'Host': '9ngy81lc6h.execute-api.us-east-1.amazonaws.com', 'User-Agent': 'python-requests/2.28.1', 'X-Amzn-Trace-Id': 'Root=1-62ca1950-4d0f6e331b5bcdec43be9d89', 'X-Forwarded-For': '71.193.225.101', 'X-Forwarded-Port': '443', 'X-Forwarded-Proto': 'https', 'accept': '*/*', 'accept-encoding': 'gzip, deflate'
+        }, 
+    'multiValueHeaders': {
+        'Content-Length': ['154'], 'Content-Type': ['application/json'], 'Host': ['9ngy81lc6h.execute-api.us-east-1.amazonaws.com'], 'User-Agent': ['python-requests/2.28.1'], 'X-Amzn-Trace-Id': ['Root=1-62ca1950-4d0f6e331b5bcdec43be9d89'], 'X-Forwarded-For': ['71.193.225.101'], 'X-Forwarded-Port': ['443'], 'X-Forwarded-Proto': ['https'], 'accept': ['*/*'], 'accept-encoding': ['gzip, deflate']
+    }, 
+    'queryStringParameters': None, 
+    'multiValueQueryStringParameters': None, 
+    'requestContext': {'accountId': '995031931662', 'apiId': '9ngy81lc6h', 'domainName': '9ngy81lc6h.execute-api.us-east-1.amazonaws.com', 'domainPrefix': '9ngy81lc6h', 'extendedRequestId': 'VBjklja2IAMEV5Q=', 'httpMethod': 'POST', 'identity': {'accessKey': None, 'accountId': None, 'caller': None, 'cognitoAmr': None, 'cognitoAuthenticationProvider': None, 'cognitoAuthenticationType': None, 'cognitoIdentityId': None, 'cognitoIdentityPoolId': None, 'principalOrgId': None, 'sourceIp': '71.193.225.101', 'user': None, 'userAgent': 'python-requests/2.28.1', 'userArn': None}, 'path': '/logs', 'protocol': 'HTTP/1.1', 'requestId': 'VBjklja2IAMEV5Q=', 'requestTime': '10/Jul/2022:00:12:00 +0000', 'requestTimeEpoch': 1657411920366, 'resourceId': 'POST /logs', 'resourcePath': '/logs', 'stage': '$default'}, 'pathParameters': None, 'stageVariables': None, 'body': '{"id": "abpjdsawkadfsnslcifyzxvulllyqfqw", "timestamp": "2022-07-09 17:11:59.989972", "status": "No longer detecting faces or bodies. Recording stopped,"}', 'isBase64Encoded': False}
+
+
+def generateId(length):
+   letters = string.ascii_lowercase
+   return ''.join(random.choice(letters) for i in range(length))
+
 def log(message):
-    body = "[LOG] " + str(dt.now()) + " - " + message
+    log_format['timestamp'] = str(dt.now())
+    log_format['status'] = message
+    log_format['id'] = generateId(32)
+    body = log_format
     print("[LOG] " + str(dt.now()) + " - " + message)
     requests.post(API_URL, json = body)
 
 def camera(man):
-    log("Starting camera")
+    log("Camera feed started...")
     vc = cv2.VideoCapture(0)
     face_cascade = cv2.CascadeClassifier( cv2.data.haarcascades + "haarcascade_frontalface_default.xml" )
     body_cascade = cv2.CascadeClassifier( cv2.data.haarcascades + "haarcascade_fullbody.xml" )
@@ -80,20 +108,20 @@ def server():
         httpd = ThreadingHTTPServer(server_address, http.SimpleHTTPRequestHandler)
     else:
         httpd = http.ThreadingHTTPServer(server_address, http.SimpleHTTPRequestHandler)
-    log("Server started")
+    log("Server starting up...")
     httpd.serve_forever()
 
 def socket(man):
     # Will handle our websocket connections
     async def handler(websocket, path):
-        log("Socket opened")
+        log("Socket opened...")
         try:
             while True:
                 await asyncio.sleep(0.033) # 30 fps
                 await websocket.send(man[0].tobytes())
         except websockets.exceptions.ConnectionClosed:
-            log("Socket closed")
-    log("Starting socket handler")
+            log("Socket closed...")
+    log("Starting socket handler...")
     # Create the awaitable object
     start_server = websockets.serve(ws_handler=handler, host=HOST, port=int(SOCKET_PORT))
     # Start the server, add it to the event loop

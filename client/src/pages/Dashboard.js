@@ -5,8 +5,6 @@ import VideoCard from '../components/VideoCard'
 import videoplacehoder from '../assets/tv-static.gif'
 import axios from 'axios';
 
-import "../App.css";
-
 const logs = [
     {
         id: '234235235235',
@@ -136,8 +134,9 @@ const Files = (props) => {
 function Dashboard() {
     const [ showVideo, setVideoVisible ] = React.useState(false);
     const [socket, setSocket] = React.useState(null);
-    const [status, setStatus] = React.useState('Disconnected.')
-    const canvasRef = React.useRef()
+    const [status, setStatus] = React.useState('Disconnected.');
+    // const [logs, setLogs] = React.useState([]);
+    const canvasRef = React.useRef();
   
     const changeFrame = function (e) {
       let image = new Image();
@@ -150,13 +149,22 @@ function Dashboard() {
       });
     }
 
+    // React.useEffect(() => {
+    //     if(!socket){
+    //         setSocket(new WebSocket(process.env.REACT_APP_WEBSOCKET_URL))
+    //         setVideoVisible(true)
+    //     }
+    //     temp_logs = fetchDatabase()
+    //     setLogs(temp_logs)
+    // }, [logs])
+
     const disconnectSocket =  () => {
         socket.send('!DISCONNECT')
         socket.close()
         setStatus('Disconnected.')
-      }
+    }
     
-      if (socket && showVideo) {
+    if (socket && showVideo) {
         socket.addEventListener('open', () => {
           console.log('connected successfully');
           setStatus('Connected.')
@@ -175,33 +183,34 @@ function Dashboard() {
         };
       }
     
-    //   const sendMessageToSocket = (socket) => {
-    //     socket.send('hello world')
-    //   }
-    
       const handleButtonClick = () => {
         if(!showVideo){
-              setSocket(new WebSocket(process.env.REACT_APP_WEBSOCKET_URL))
+            setSocket(new WebSocket(process.env.REACT_APP_WEBSOCKET_URL))
             setVideoVisible(true)
         } else {
             setVideoVisible(false)
             disconnectSocket()
         }
-      }
+    }
 
     const fetchDatabase = async() => {
-        let response = await axios.get(process.env.REACT_APP_DATABASE_GET_URL).then((response) => {
-            return response.data;
-          });
-        let formattedResponse = []
+        let response = await axios.get(process.env.REACT_APP_DATABASE_GET_URL).then(response => response.data);
+        let formattedResponse = [];
         for (let index = 1; index < response.length; index++) {
             formattedResponse.push(response[index].log);
-        }
-        console.log(formattedResponse)
+        };
+        return formattedResponse
     }
 
     return (
-        <Grid container >
+        <Grid
+            container
+            direction="row"
+            justifyContent="center"
+            alignItems="flex-start"
+            spacing={2}
+            sx={{padding: '50px'}}
+        >
             <Grid item xs={2}>
                 <Typography variant="body">
                     Menu
@@ -215,7 +224,7 @@ function Dashboard() {
             <Grid item xs={10}>
                 <Grid container>
                     <Grid item xs={12}>
-                        <Grid container>
+                        <Grid container spacing={2}>
                             <Grid item xs={4}>
                                 <Logs logs={logs} />
                                 <Files files={logs} />
@@ -225,10 +234,10 @@ function Dashboard() {
                                     showVideo ? <VideoCard ref={canvasRef} status={status} /> : 
                                     <Card>
                                         <Typography variant="h5">{status}</Typography>
-                                        <CardContent>
+                                        <CardContent sx={{textAlign: 'center', boxSizing: 'border-box'}}>
                                             <canvas id="msg" height="250px" style={{display: "inline-block", backgroundImage: `url(${videoplacehoder})`}} /> 
                                         </CardContent>
-                                        <CardActions>
+                                        <CardActions >
                                             <Button onClick={() => handleButtonClick()}>Connect</Button>
                                         </CardActions>
                                     </Card>
