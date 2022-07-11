@@ -5,6 +5,26 @@ from dotenv import load_dotenv
 from os.path import join, dirname
 import random, string
 
+import boto3
+from botocore.exceptions import NoCredentialsError
+BUCKET_NAME = 'video-archive-files'
+
+def upload_file(filename, bucket_name, s3_file):
+    s3 = boto3.client('s3')
+    try:
+        s3.upload_file(filename, bucket_name, s3_file)
+        print('Success')
+        return True
+    except NoCredentialsError:
+        print('Error, no crds')
+        return False
+    except FileNotFoundError:
+        print('Error, no  file')
+        return False
+    except:
+        print('Error')
+        return False
+
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
@@ -70,7 +90,7 @@ def camera(man):
             else:
                 detection = True
                 current_time = dt.now().strftime("%d-%m-%Y-%H-%M-%S")
-                out = cv2.VideoWriter( f"server/videos/{current_time}.mp4", fourcc, 20, frame_size)
+                out = cv2.VideoWriter( f"./videos/{current_time}.mp4", fourcc, 20, frame_size)
                 log(f"{len(faces)} Person(s) Detected.", "person", "active")
                 print(f'Faces Detected: {len(faces)}. Bodies Detected: {len(bodies)}. Recording has started on file: {current_time}.mp4')
         elif detection:
@@ -79,6 +99,7 @@ def camera(man):
                     detection = False
                     timer_started = False
                     out.release()
+                    upload_file(f'./videos/{current_time}.mp4', BUCKET_NAME, f'./videos/{current_time}.mp4')
                     log('No Longer Detecting Faces or Bodies.', "person", "inactive")
             else:
                 timer_started = True
