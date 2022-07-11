@@ -1,13 +1,14 @@
 import { Card, CardContent, CardActions, Button, Typography } from '@mui/material';
 import videoplacehoder from '../assets/tv-static.gif';
 import React, { forwardRef } from 'react';
+import './VideoCard.css';
 
 const ActiveVideoFeed = forwardRef((props, ref) => {
     const { status } = props;
     return (
         <CardContent>
             <Typography variant="h5">{status}</Typography>
-            <canvas id="msg" height="250px" ref={ref} style={{display: "inline-block"}} /> 
+            <canvas id="msg" height="250px" className="canvas-video" ref={ref} style={{display: "inline-block"}} /> 
         </CardContent>
     )
 });
@@ -15,9 +16,9 @@ const ActiveVideoFeed = forwardRef((props, ref) => {
 const InActiveVideoFeed = (props) => {
     const { status } = props;
     return (
-        <CardContent sx={{textAlign: 'center', boxSizing: 'border-box'}}>
+        <CardContent>
             <Typography variant="h5">{status}</Typography>
-            <canvas id="msg" height="250px" style={{display: "inline-block", backgroundImage: `url(${videoplacehoder})`}} /> 
+            <canvas id="msg" height="250px" className="canvas-video" style={{display: "inline-block", backgroundImage: `url(${videoplacehoder})`}} /> 
         </CardContent>
     )
 };
@@ -70,28 +71,18 @@ const VideoCard = () => {
             disconnectSocket()
         }
     }
-
-    const handleStopVideo = () => {
-
-    }
     
     const handleStartVideo = () => {
         establishConnectionToVideoFeed()
     }
 
-    const handleDownloadVideo = () => {
-
-    }
-
     return (
-        <Card>
+        <Card sx={{maxWidth: '500px', display: 'block', margin: '0 auto'}}>
             {
-                showVideo ? <ActiveVideoFeed status={status} ref={ref} /> : <InActiveVideoFeed />
+                showVideo ? <ActiveVideoFeed status={status} ref={canvasRef} /> : <InActiveVideoFeed status={status} />
             }
             <CardActions>
-                <Button onClick={() => handleStopVideo}>Start Video</Button>
-                <Button onClick={() => handleStartVideo}>Stop Video</Button>
-                <Button onClick={() => handleDownloadVideo}>Download Video</Button>
+                <Button onClick={() => handleStartVideo()}>{ showVideo ? 'Stop Video' : 'Start Video' }</Button>
             </CardActions>
         </Card>
     )
