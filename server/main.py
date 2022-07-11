@@ -1,38 +1,18 @@
-import time, asyncio, websockets, socketserver, multiprocessing, cv2, sys, requests, os
+import time, asyncio, websockets, socketserver, multiprocessing, cv2, sys, requests, os, boto3, uuid
 import http.server as http
+from botocore.exceptions import NoCredentialsError, ClientError
 from datetime import datetime as dt
 from dotenv import load_dotenv
 from os.path import join, dirname
-import random, string
 
-import boto3
-from botocore.exceptions import NoCredentialsError
-BUCKET_NAME = 'video-archive-files'
-
-def upload_file(filename, bucket_name, s3_file):
-    s3 = boto3.client('s3')
-    try:
-        s3.upload_file(filename, bucket_name, s3_file)
-        print('Success')
-        return True
-    except NoCredentialsError:
-        print('Error, no crds')
-        return False
-    except FileNotFoundError:
-        print('Error, no  file')
-        return False
-    except:
-        print('Error')
-        return False
-
+# Keep Secrets Secure
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
-
 API_URL = os.environ.get("API_URL")
 HOST=os.environ.get("HOST")
 CAMERA_PORT=os.environ.get("CAMERA_PORT")
 SOCKET_PORT=os.environ.get("SOCKET_PORT")
-
+VIDEO_BUCKET_NAME=os.environ.get("VIDEO_BUCKET_NAME")
 # Keep track of our processes
 PROCESSES = []
 
@@ -41,22 +21,55 @@ log_format = {
     'timestamp': 'timestamp',
     'status': 'status',
     'message': 'message',
-    'type': 'type'
+    'type': 'type',
+    'path': 'path'
 }
 
-def generateId(length):
-   letters = string.ascii_lowercase
-   return ''.join(random.choice(letters) for i in range(length))
-
-def log(message, type, status):
-    log_format['id'] = generateId(32)
+def log(message, type, status, path='unknown'):
+    log_format['id'] = str(uuid.uuid4())
     log_format['timestamp'] = str(dt.now())
     log_format['message'] = message
     log_format['status'] = status
     log_format['type'] = type
+    log_format['path'] = path
     body = log_format
     print("[LOG] " + str(dt.now()) + " - " + message)
     requests.post(API_URL, json = body)
+
+def upload_file(file_name, bucket_name, object_name, message):
+    print("Uploading file " + file_name + " to " + bucket_name + "..." + object_name)
+    s3_client = boto3.client('s3')
+    try:
+        s3_client.upload_file(file_name, bucket_name, object_name)
+        print('Success')
+        return True
+    except NoCredentialsError:
+        log(f"Error uploading {file_name} due to a credentials error.", "video_upload", "inactive")
+        print('Error, no credentials found for upload')
+        return False
+    except FileNotFoundError:
+        log(f"Error uploading {file_name} due to a file not found error.", "video_upload", "inactive")
+        print('Error, no file found for upload')
+        return False
+    except ClientError:
+        log(f"Error uploading {file_name} due to a client error.", "video_upload", "inactive")
+        print('Error, no file found for upload')
+    except:
+        log(f"Error uploading {file_name} due to an unknown error.", "video_upload", "inactive")
+        print('Error')
+        return False
+
+def video(man, file):
+    vc = cv2.VideoCapture(file)
+    if vc.isOpened():
+        r, f = vc.read()
+    else:
+        r = False
+    while r:
+        r, f = vc.read()
+        f = cv2.resize(f, (640, 480))
+        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 65]
+        man[0] = cv2.imencode('.jpg', f, encode_param)[1]
 
 def camera(man):
     log("Camera Feed Started", 'camera', 'active')
@@ -83,23 +96,27 @@ def camera(man):
         if len(faces) + len(bodies) > 0:
             for (x, y, width, height) in faces:
                 cv2.rectangle(f, (x, y), (x + width, y + height), (255, 0, 0), 3)
-            # for (x, y, width, height) in bodies:
-            #     cv2.rectangle(f, (x, y), (x + width, y + height), (0, 255, 0), 3)
+            for (x, y, width, height) in bodies:
+                cv2.rectangle(f, (x, y), (x + width, y + height), (0, 255, 0), 3)
             if detection:
                 timer_started = False
             else:
                 detection = True
-                current_time = dt.now().strftime("%d-%m-%Y-%H-%M-%S")
-                out = cv2.VideoWriter( f"./videos/{current_time}.mp4", fourcc, 20, frame_size)
+                today = dt.now().strftime("%d-%m-%Y")
+                current_time = dt.now().strftime("%H-%M-%S")
+                file_name = f'{len(faces)}_Detected_at_{current_time}'
+                if not os.path.isdir(f"./videos/{today}"):
+                    os.mkdir(f"./videos/{today}")
+                out = cv2.VideoWriter( f"./videos/{today}/{file_name}.mp4", fourcc, 20, frame_size)
                 log(f"{len(faces)} Person(s) Detected.", "person", "active")
-                print(f'Faces Detected: {len(faces)}. Bodies Detected: {len(bodies)}. Recording has started on file: {current_time}.mp4')
+                print(f'Faces Detected: {len(faces)}. Bodies Detected: {len(bodies)}. Recording has started on file: {file_name}.mp4')
         elif detection:
             if timer_started:
                 if time.time() - detection_stopped_time >= SECONDS_TO_RECORD_AFTER_DETECTION:
                     detection = False
                     timer_started = False
                     out.release()
-                    upload_file(f'./videos/{current_time}.mp4', BUCKET_NAME, f'./videos/{current_time}.mp4')
+                    upload_file(f'./videos/{today}/{file_name}.mp4', VIDEO_BUCKET_NAME, f'./videos/{today}/{file_name}.mp4', file_name)
                     log('No Longer Detecting Faces or Bodies.', "person", "inactive")
             else:
                 timer_started = True

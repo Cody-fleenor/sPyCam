@@ -1,17 +1,21 @@
 import React from 'react';
 import axios from 'axios';
 import { Grid } from '@mui/material';
-import { mock_files } from '../data/mock_data';
 import { Logs, Files, VideoCard} from '../components';
 
 function Dashboard() {
     const [ logs, setLogs ] = React.useState(null);
+    const [ files, setFiles ] = React.useState(null);
 
     React.useEffect(() => {
         axios.get(process.env.REACT_APP_DATABASE_GET_URL)
         .then((response) => {return response.data})
-        .then((json) => setLogs(json))
+        .then((json) => {
+            setFiles([...new Set(json)])
+            setLogs([...new Set(json)])
+        })
         .catch((error) => console.log(error));
+        // eslint-disable-next-line 
     }, [])
 
     return (
@@ -25,7 +29,7 @@ function Dashboard() {
         >
             <Grid item xs={4}>
                 <Logs logs={logs} />
-                <Files files={mock_files} />
+                <Files files={files} />
             </Grid>
             <Grid item xs={8}>
                 <VideoCard />
